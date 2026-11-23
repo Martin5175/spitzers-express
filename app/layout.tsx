@@ -12,7 +12,13 @@ export const viewport: Viewport = { themeColor: "#ef4c23", width: "device-width"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: "only light" }}>
+      <head>
+        {/* Keep the brand colors: stop phones/browsers from auto-darkening the app */}
+        <meta name="color-scheme" content="only light" />
+        <meta name="supported-color-schemes" content="light" />
+        <meta name="darkreader-lock" />
+      </head>
       <body>{children}</body>
     </html>
   );
