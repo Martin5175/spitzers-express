@@ -7,6 +7,7 @@ const NAV = [
   { href: "/", label: "Today", ic: "🚚" },
   { href: "/voice", label: "Voice", ic: "🎤" },
   { href: "/new", label: "New Job", ic: "+", plus: true },
+  { href: "/jobs", label: "Jobs", ic: "📋" },
   { href: "/customers", label: "Customers", ic: "👥" },
   { href: "/money", label: "Money", ic: "💵" },
 ];
@@ -36,9 +37,6 @@ export default function Shell({ title, back, children, headerExtra }: { title: s
             <img src="/logo.png" alt="" />
           )}
           <h1>{title}</h1>
-          {!back && (
-            <Link href="/jobs" aria-label="All jobs" style={{ fontSize: 15, fontWeight: 800, background: "rgba(255,255,255,.35)", borderRadius: 10, padding: "8px 10px", whiteSpace: "nowrap" }}>📋 All jobs</Link>
-          )}
           {path !== "/settings" && !back && (
             <Link href="/settings" aria-label="Settings" style={{ fontSize: 26 }}>⚙️</Link>
           )}

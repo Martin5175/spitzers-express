@@ -109,3 +109,29 @@ test("photo message", () => {
   assert.equal(m, "Hi Gemsli, your delivery to 52 Bakertown Rd was completed at 2:15 PM. Photo attached. Thank you! – Spitzer's Express 845-781-6392");
   assert.equal(fillMessage("Delivered {item} to {address}!", { item: "cake", address: "" }), "Delivered cake to!");
 });
+
+import { periodRange } from "../lib/periods.ts";
+test("periods", () => {
+  assert.deepEqual(periodRange("week", 0, "2026-11-22").from, "2026-11-22"); // Sunday
+  assert.equal(periodRange("week", 0, "2026-11-25").to, "2026-11-28");
+  assert.equal(periodRange("week", -1, "2026-11-25").from, "2026-11-15");
+  const m = periodRange("month", -1, "2026-03-10");
+  assert.equal(m.from, "2026-02-01"); assert.equal(m.to, "2026-02-28");
+  assert.equal(periodRange("month", 2, "2026-11-10").from, "2027-01-01");
+  assert.equal(periodRange("year", 0, "2026-11-10").to, "2026-12-31");
+});
+
+import { buildWorkbook } from "../lib/exportSheet.ts";
+test("excel export layout", () => {
+  const base = { description: null, notes: null, delivery_status: "delivered", invoice_requested: false, invoice_number: null, extras: [], payments: [] };
+  const tabs = buildWorkbook([
+    { ...base, id: "1", job_date: "2026-11-03", customer: "Em Kay", stops: [{ kind: "pickup", address_text: "203 Rutledge", contact: null }, { kind: "dropoff", address_text: "Monroe", contact: null }], total: 35, paid: 35, balance: 0, payments: [{ amount: 35, method: "Zelle" }] },
+    { ...base, id: "2", job_date: "2026-11-03", customer: "All in one appliances", invoice_requested: true, stops: [{ kind: "pickup", address_text: "1 Lemberg", contact: null }, { kind: "dropoff", address_text: "Williamsburg", contact: null }, { kind: "dropoff", address_text: "BP", contact: null }], total: 60, paid: 0, balance: 60 },
+    { ...base, id: "3", job_date: "2026-10-29", customer: "Gemsli", stops: [], total: 150, paid: 0, balance: 150 },
+  ], [{ name: "Gemsli", phone: null, email: null, address: null, balance: 150 }]);
+  assert.deepEqual(tabs.map((t) => t.name), ["October 2026", "November 2026", "Open Balances", "Customer Info"]);
+  const nov = tabs[1].rows;
+  assert.deepEqual(nov[2], ["Nov 3", "Em Kay", "203 Rutledge", "Monroe", "", 35, "paid 35(zelle)", ""]);
+  assert.deepEqual(nov[3], ["", "All in one appliances", "1 Lemberg", "Williamsburg / BP", "2 stops", 60, "", "unpaid, please send a invoice"]);
+  assert.equal(nov[nov.length - 1][5], 95);
+});
