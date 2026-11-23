@@ -5,9 +5,8 @@ import { useEffect, useState } from "react";
 
 const NAV = [
   { href: "/", label: "Today", ic: "🚚" },
-  { href: "/voice", label: "Voice", ic: "🎤" },
-  { href: "/new", label: "New Job", ic: "+", plus: true },
   { href: "/jobs", label: "Jobs", ic: "📋" },
+  { href: "/new", label: "New Job", ic: "+", plus: true },
   { href: "/customers", label: "Customers", ic: "👥" },
   { href: "/money", label: "Money", ic: "💵" },
 ];
@@ -16,7 +15,7 @@ export function toast(msg: string) {
   window.dispatchEvent(new CustomEvent("toast", { detail: msg }));
 }
 
-export default function Shell({ title, back, children, headerExtra }: { title: string; back?: boolean; children: React.ReactNode; headerExtra?: React.ReactNode }) {
+export default function Shell({ title, back, children, headerExtra, headerRight }: { title: string; back?: boolean; children: React.ReactNode; headerExtra?: React.ReactNode; headerRight?: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [msg, setMsg] = useState<string | null>(null);
@@ -26,7 +25,7 @@ export default function Shell({ title, back, children, headerExtra }: { title: s
     window.addEventListener("toast", h);
     return () => window.removeEventListener("toast", h);
   }, []);
-  const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+  const active = (href: string) => (href === "/" ? path === "/" : href === "/new" ? path.startsWith("/new") || path.startsWith("/voice") : path.startsWith(href));
   return (
     <div className="app">
       <header className="top">
@@ -37,6 +36,7 @@ export default function Shell({ title, back, children, headerExtra }: { title: s
             <img src="/logo.png" alt="" />
           )}
           <h1>{title}</h1>
+          {headerRight}
           {path !== "/settings" && !back && (
             <Link href="/settings" aria-label="Settings" style={{ fontSize: 26 }}>⚙️</Link>
           )}

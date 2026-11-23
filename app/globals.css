@@ -55,7 +55,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Bottom navigation */
 .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--charcoal); z-index: 30; padding-bottom: env(safe-area-inset-bottom); }
-.nav-in { max-width: 720px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); height: var(--nav-h); }
+.nav-in { max-width: 720px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--nav-h); }
 .nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #ddd; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .nav a .ic { font-size: 25px; line-height: 1; }
 .nav a.on { color: #fff; background: rgba(255,255,255,.08); box-shadow: inset 0 4px 0 var(--orange); }
@@ -177,3 +177,6 @@ textarea.input { min-height: 80px; resize: vertical; }
 .suggest-box { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 2px solid var(--orange); border-radius: 12px; z-index: 15; box-shadow: 0 8px 24px rgba(0,0,0,.15); overflow: hidden; }
 .suggest-item { display: block; width: 100%; text-align: left; padding: 14px 12px; border: 0; border-bottom: 1px solid var(--line); background: #fff; font-size: 17px; cursor: pointer; }
 .suggest-item:active, .suggest-item:hover { background: var(--cream); }
+
+/* Small mic shortcut in the New Job header */
+.mic-mini { display: inline-flex; align-items: center; gap: 6px; background: #111; color: #fff; border-radius: 999px; padding: 10px 14px; font-weight: 800; font-size: 16px; white-space: nowrap; }

@@ -1,6 +1,7 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Shell, { toast } from "@/components/Shell";
 import JobForm, { afterSavePreferred } from "@/components/JobForm";
 import { emptyStop, loadJobs, saveDraft, type Draft } from "@/lib/data";
@@ -48,7 +49,8 @@ function NewJob() {
   }
 
   return (
-    <Shell title={editId ? "Edit job" : "New job"} back={!!editId}>
+    <Shell title={editId ? "Edit job" : "New job"} back={!!editId}
+      headerRight={!editId ? <Link href="/voice" className="mic-mini" aria-label="Add jobs by voice">🎤 Voice</Link> : undefined}>
       {ready ? (
         <JobForm draft={draft} setDraft={setDraft} contacts={contacts} setContacts={setContacts} ranked={ranked} onSave={save} saving={saving} saveLabel={editId ? "Save changes" : undefined} />
       ) : <p className="muted">Loading…</p>}

@@ -188,7 +188,7 @@ export default function Voice() {
   }
 
   return (
-    <Shell title="Voice memo">
+    <Shell title="Voice memo" back>
       <p className="center" style={{ fontSize: 20, margin: "8px 0 0" }}>
         {rec ? "Recording… tap to stop" : busy ? "" : "Tap and say the jobs"}
       </p>
