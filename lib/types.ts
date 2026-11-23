@@ -2,7 +2,7 @@ export type Contact = {
   id: string; name: string; phone: string | null; email: string | null;
   instructions: string | null; notes: string | null; aliases: string[];
   photo_text_to: "customer" | "dropoff" | "pickup" | "none";
-  invoice_email: string | null; wants_invoices: boolean;
+  invoice_email: string | null; wants_invoices: boolean; photo_message?: string | null;
 };
 export type Address = { id: string; contact_id: string | null; line: string; area: string | null; notes: string | null };
 export type StopKind = "pickup" | "dropoff";

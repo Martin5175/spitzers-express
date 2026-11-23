@@ -102,3 +102,10 @@ test("card data never survives", () => {
   }
   assert.equal(stripCardData("call 845-781-6392").text, "call 845-781-6392");
 });
+
+import { fillMessage, DEFAULT_PHOTO_MESSAGE } from "../lib/photoMessage.ts";
+test("photo message", () => {
+  const m = fillMessage(DEFAULT_PHOTO_MESSAGE, { customer: "Gemsli", address: "52 Bakertown Rd", time: "2:15 PM", business: "Spitzer's Express", phone: "845-781-6392" });
+  assert.equal(m, "Hi Gemsli, your delivery to 52 Bakertown Rd was completed at 2:15 PM. Photo attached. Thank you! – Spitzer's Express 845-781-6392");
+  assert.equal(fillMessage("Delivered {item} to {address}!", { item: "cake", address: "" }), "Delivered cake to!");
+});

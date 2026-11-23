@@ -200,3 +200,10 @@ create policy "signed in files" on storage.objects for all to authenticated
 insert into extra_presets (label, amount, sort)
 select * from (values ('Return trip', 20, 1), ('Waiting time', 10, 2), ('Extra stop', 10, 3), ('Pick up money', 10, 4)) v
 where not exists (select 1 from extra_presets);
+
+-- (Update 2) custom photo text message
+create table if not exists app_settings (key text primary key, value text, updated_at timestamptz not null default now());
+alter table app_settings enable row level security;
+drop policy if exists "signed in" on app_settings;
+create policy "signed in" on app_settings for all to authenticated using (true) with check (true);
+alter table contacts add column if not exists photo_message text;

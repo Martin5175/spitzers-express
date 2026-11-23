@@ -47,10 +47,12 @@ export default function CustomerPage() {
   if (!c) return <Shell title="Customer" back><p className="muted">Loading…</p></Shell>;
 
   const balance = jobs.reduce((s, j) => s + Math.max(0, j.money?.balance || 0), 0);
-  const changed = ["name", "phone", "email", "instructions", "notes", "invoice_email"].some((k) => ((form as any)[k] || "") !== ((c as any)[k] || ""));
+  const msgChanged = (form.photo_message || "") !== (c.photo_message || "");
+  const changed = msgChanged || ["name", "phone", "email", "instructions", "notes", "invoice_email"].some((k) => ((form as any)[k] || "") !== ((c as any)[k] || ""));
 
   async function save(patch?: Partial<Contact>) {
-    const body = patch || { name: form.name, phone: form.phone || null, email: form.email || null, instructions: form.instructions || null, notes: form.notes || null, invoice_email: form.invoice_email || null };
+    const body: Record<string, unknown> = patch || { name: form.name, phone: form.phone || null, email: form.email || null, instructions: form.instructions || null, notes: form.notes || null, invoice_email: form.invoice_email || null };
+    if (!patch && msgChanged) body.photo_message = (form.photo_message || "").trim() || null;
     const { error } = await sb().from("contacts").update(body).eq("id", id);
     if (error) toast(error.message); else { toast("Saved ✓"); load(); }
   }
@@ -145,6 +147,13 @@ export default function CustomerPage() {
           <button key={v} className={"chip" + (c.photo_text_to === v ? " on" : "")} onClick={() => save({ photo_text_to: v })}>{l}</button>
         ))}
       </div>
+
+      {c.photo_text_to !== "none" && (
+        <label className="f"><span>Special photo message for {c.name} (optional)</span>
+          <textarea className="input" rows={3} placeholder="Leave empty to use the general message from Settings" value={form.photo_message || ""} onChange={(e) => setForm({ ...form, photo_message: e.target.value })} />
+          {msgChanged && <button className="btn primary block" style={{ marginTop: 8 }} onClick={() => save()}>Save message</button>}
+        </label>
+      )}
 
       <div className="h2">Invoices</div>
       <div className="card">

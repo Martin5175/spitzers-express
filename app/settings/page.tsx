@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Shell, { toast } from "@/components/Shell";
 import { sb } from "@/lib/supabase-browser";
+import { DEFAULT_PHOTO_MESSAGE, PLACEHOLDERS, fillMessage } from "@/lib/photoMessage";
 
 type Preset = { id: string; label: string; amount: number; sort: number };
 type Flag = { id: string; kind: string; message: string; job_id: string | null; contact_id: string | null; created_at: string };
@@ -13,6 +14,9 @@ export default function Settings() {
   const [flagCount, setFlagCount] = useState(0);
   const [n, setN] = useState({ label: "", amount: "" });
   const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState(DEFAULT_PHOTO_MESSAGE);
+  const [msgSaved, setMsgSaved] = useState(DEFAULT_PHOTO_MESSAGE);
+  const [msgErr, setMsgErr] = useState("");
 
   const load = useCallback(async () => {
     const [p, f, u] = await Promise.all([
@@ -24,7 +28,17 @@ export default function Settings() {
     setFlags((f.data || []) as Flag[]);
     setFlagCount(f.count || 0);
     setEmail(u.data.user?.email || "");
+    const m = await sb().from("app_settings").select("value").eq("key", "photo_message").maybeSingle();
+    if (m.error) setMsgErr("To save a custom message, run the file supabase/update-2-photo-message.sql in Supabase → SQL Editor once.");
+    else if (m.data?.value) { setMsg(m.data.value); setMsgSaved(m.data.value); }
   }, []);
+
+  async function saveMsg(value: string) {
+    const { error } = await sb().from("app_settings").upsert({ key: "photo_message", value, updated_at: new Date().toISOString() });
+    if (error) { toast("Couldn't save. Run the Supabase update first."); return; }
+    setMsg(value); setMsgSaved(value);
+    toast("Message saved ✓");
+  }
   useEffect(() => { load(); }, [load]);
 
   async function addPreset() {
@@ -48,7 +62,24 @@ export default function Settings() {
 
   return (
     <Shell title="Settings" back>
-      <div className="h2" style={{ marginTop: 0 }}>Quick extra charges</div>
+      <div className="h2" style={{ marginTop: 0 }}>Photo text message</div>
+      <p className="muted small" style={{ marginTop: 0 }}>Sent with every delivery photo. Tap a blue word to add it — it fills in by itself.</p>
+      {msgErr && <div className="note warn small" style={{ marginBottom: 8 }}>{msgErr}</div>}
+      <textarea className="input" rows={4} value={msg} onChange={(e) => setMsg(e.target.value)} />
+      <div className="chips" style={{ marginTop: 8 }}>
+        {PLACEHOLDERS.map(([k, label]) => (
+          <button key={k} className="chip" style={{ minHeight: 38, fontSize: 14, color: "var(--blue)" }} onClick={() => setMsg((m) => (m.endsWith(" ") || !m ? m : m + " ") + k)}>+ {label}</button>
+        ))}
+      </div>
+      <div className="note info small" style={{ marginTop: 10 }}>
+        <b>Example:</b> {fillMessage(msg || DEFAULT_PHOTO_MESSAGE, { customer: "Gemsli", receiver: "Yoely", address: "52 Bakertown Rd", item: "3 boxes", time: "2:15 PM", date: "Nov 23", business: "Spitzer's Express", phone: "845-781-6392" })}
+      </div>
+      <div className="btn-row" style={{ marginTop: 10 }}>
+        <button className="btn ghost" onClick={() => saveMsg(DEFAULT_PHOTO_MESSAGE)}>Reset</button>
+        <button className="btn primary" disabled={msg === msgSaved || !msg.trim()} onClick={() => saveMsg(msg.trim())}>Save message</button>
+      </div>
+
+      <div className="h2">Quick extra charges</div>
       <p className="muted small" style={{ marginTop: 0 }}>These show as one-tap buttons on every job.</p>
       {presets.map((p) => (
         <div key={p.id} className="card row" style={{ marginTop: 6, padding: 10 }}>

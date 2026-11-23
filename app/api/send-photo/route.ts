@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/supabase-server";
 import { toE164 } from "@/lib/phone";
+import { DEFAULT_PHOTO_MESSAGE, fillMessage } from "@/lib/photoMessage";
 
 export const runtime = "nodejs";
 
@@ -51,9 +52,22 @@ export async function POST(req: Request) {
     const { data } = await s.storage.from("photos").createSignedUrl(p.path, 60 * 60 * 24 * 7);
     if (data?.signedUrl) urls.push(data.signedUrl);
   }
-  const place = photoStop?.address_text ? ` at ${photoStop.address_text}` : "";
-  const time = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
-  const body = `${process.env.BUSINESS_NAME || "Spitzer's Express"}: your delivery${place} was completed at ${time}. Photo attached. Questions? ${process.env.BUSINESS_PHONE || "845-781-6392"}`;
+  const now = new Date();
+  const time = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
+  const date = now.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "America/New_York" });
+  const dropStop = photoStop?.kind === "dropoff" ? photoStop : stops.filter((x: any) => x.kind === "dropoff").slice(-1)[0];
+  const { data: receiver } = dropStop?.contact_id ? await s.from("contacts").select("name").eq("id", dropStop.contact_id).single() : { data: null };
+  // Message: this customer's own message → general message from Settings → built-in default
+  let tpl = (customer as any)?.photo_message as string | null;
+  if (!tpl) {
+    const { data: setting, error } = await s.from("app_settings").select("value").eq("key", "photo_message").maybeSingle();
+    if (!error && setting?.value) tpl = setting.value;
+  }
+  const body = fillMessage(tpl || DEFAULT_PHOTO_MESSAGE, {
+    customer: customer?.name, receiver: receiver?.name || who?.name, address: dropStop?.address_text?.split(",")[0],
+    item: job?.description, time, date,
+    business: process.env.BUSINESS_NAME || "Spitzer's Express", phone: process.env.BUSINESS_PHONE || "845-781-6392",
+  }).slice(0, 1500);
 
   const form = new URLSearchParams({ To: to, From: from, Body: body });
   urls.forEach((u) => form.append("MediaUrl", u));
