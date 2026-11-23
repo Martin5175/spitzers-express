@@ -259,3 +259,25 @@ export async function openJobsFor(customerId: string) {
   const { data } = await sb().from("job_money").select("job_id, balance, job_date").eq("customer_id", customerId).gt("balance", 0).limit(1000);
   return (data || []).map((r: any) => ({ job_id: r.job_id, balance: Number(r.balance), job_date: r.job_date as string }));
 }
+
+/** Where things picked up at this address usually go (learned from all past jobs, any customer). */
+export async function usualDropoffsFrom(pickupAddress: string): Promise<{ address_text: string; area: string | null; contact_id: string | null; count: number }[]> {
+  const line = pickupAddress.trim();
+  if (line.length < 4) return [];
+  const s = sb();
+  const { data: picks } = await s.from("stops").select("job_id").eq("kind", "pickup").ilike("address_text", line.replace(/[%_]/g, "\\$&")).limit(300);
+  const ids = [...new Set((picks || []).map((p: any) => p.job_id))];
+  if (!ids.length) return [];
+  const counts = new Map<string, { address_text: string; area: string | null; contact_id: string | null; count: number }>();
+  for (let i = 0; i < ids.length; i += 150) {
+    const { data: drops } = await s.from("stops").select("address_text, area, contact_id").eq("kind", "dropoff").in("job_id", ids.slice(i, i + 150));
+    (drops || []).forEach((d: any) => {
+      if (!d.address_text || d.address_text.trim().toLowerCase() === line.toLowerCase()) return;
+      const k = d.address_text.trim().toLowerCase();
+      const c = counts.get(k) || { address_text: d.address_text.trim(), area: d.area, contact_id: d.contact_id, count: 0 };
+      c.count++;
+      counts.set(k, c);
+    });
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 4);
+}

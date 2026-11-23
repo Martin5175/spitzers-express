@@ -124,6 +124,15 @@ What the import does:
 - **👥 Customers:** phone numbers, usual trips, saved prices, what they owe, and who gets the photo text.
 - **💵 Money:** today's totals, who owes money, record a payment (one payment can cover many jobs), and send invoices.
 
+## Optional: better address suggestions (Google)
+
+Address suggestions work out of the box using free OpenStreetMap data. For Google-quality results:
+1. Go to **console.cloud.google.com**, create a project, and turn on **Places API (New)**.
+2. Open **APIs & Services → Credentials → Create credentials → API key**.
+3. In Vercel, add `GOOGLE_MAPS_API_KEY` with that key and redeploy.
+
+Google gives a large free monthly allowance, which one driver won't use up.
+
 ## If something goes wrong
 
 - **Photo text failed:** open the job and look under the photo for the reason, then tap **Resend**. The usual causes are a customer with no phone number saved, or Twilio registration still pending.

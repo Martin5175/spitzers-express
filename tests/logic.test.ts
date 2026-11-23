@@ -18,6 +18,10 @@ test("areas", () => {
   assert.equal(detectArea("4014 18th Ave"), "Borough Park");
   assert.equal(detectArea("664 Bedford Avenue"), "Williamsburg");
   assert.equal(detectArea("Clark NJ"), null);
+  assert.equal(detectArea("16 Main St, Brooklyn, NY 11219"), "Borough Park");
+  assert.equal(detectArea("16 Main St, Brooklyn, NY 11211"), "Williamsburg");
+  assert.equal(detectArea("16 Main St, Monroe, NY 10950"), "Monroe");
+  assert.equal(detectArea("7 Secor Rd, Spring Valley, NY 10977"), "Monsey");
 });
 
 test("maps links split at 10", () => {

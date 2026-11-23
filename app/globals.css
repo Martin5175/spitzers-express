@@ -171,3 +171,8 @@ textarea.input { min-height: 80px; resize: vertical; }
   .app { max-width: 820px; }
   .nav-in { max-width: 820px; }
 }
+
+/* Address suggestions */
+.suggest-box { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 2px solid var(--orange); border-radius: 12px; z-index: 15; box-shadow: 0 8px 24px rgba(0,0,0,.15); overflow: hidden; }
+.suggest-item { display: block; width: 100%; text-align: left; padding: 14px 12px; border: 0; border-bottom: 1px solid var(--line); background: #fff; font-size: 17px; cursor: pointer; }
+.suggest-item:active, .suggest-item:hover { background: var(--cream); }

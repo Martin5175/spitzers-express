@@ -12,8 +12,18 @@ const RULES: [Area, string[]][] = [
 // Brooklyn street numbers like "4014 18th Ave", "1320 50th st" are Borough Park.
 const BP_STREET = /\b\d{3,5}\s+(\d{1,2})(st|nd|rd|th)?\s*(st|street|ave|avenue)\b/i;
 
+// ZIP codes → route group
+const ZIPS: [Area, string[]][] = [
+  ["Williamsburg", ["11211", "11249", "11206", "11205", "11213", "11225", "11216", "11238"]],
+  ["Borough Park", ["11219", "11204", "11218", "11230", "11210", "11226", "11229", "11223", "11214", "11220", "11228"]],
+  ["Monroe", ["10950", "10930", "10918", "10917", "10926", "10992"]],
+  ["Monsey", ["10952", "10977", "10970", "10901", "10954", "10974", "10956", "10965", "10931", "10923"]],
+];
+
 export function detectArea(text?: string | null): Area | null {
   if (!text) return null;
+  const zip = text.match(/\b(\d{5})(?:-\d{4})?\s*$/) || text.match(/,\s*[A-Z]{2}\s+(\d{5})\b/);
+  if (zip) for (const [area, list] of ZIPS) if (list.includes(zip[1])) return area;
   const t = " " + text.toLowerCase().replace(/[^a-z0-9 .\-]/g, " ").replace(/\s+/g, " ") + " ";
   for (const [area, words] of RULES) {
     for (const w of words) {

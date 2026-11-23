@@ -5,7 +5,8 @@ import { AREAS, detectArea } from "@/lib/areas";
 import { addDays, niceDate, todayISO } from "@/lib/dates";
 import { money } from "@/lib/money";
 import { patternsFor, suggestPrice, type Pattern, type HistJob, type PreferredPrice } from "@/lib/suggest";
-import { customerHistory, draftPatternKey, emptyStop, loadAddresses, savePreferredPrice, type Draft, type DraftStop } from "@/lib/data";
+import { customerHistory, draftPatternKey, emptyStop, loadAddresses, savePreferredPrice, usualDropoffsFrom, type Draft, type DraftStop } from "@/lib/data";
+import AddressInput from "./AddressInput";
 import ContactPicker from "./ContactPicker";
 
 type Props = {
@@ -28,6 +29,14 @@ export default function JobForm({ draft, setDraft, contacts, setContacts, ranked
   const [savePref, setSavePref] = useState(false);
   const [showPatterns, setShowPatterns] = useState(true);
   const [areaOpen, setAreaOpen] = useState<number | null>(null);
+  const [usualDrops, setUsualDrops] = useState<Awaited<ReturnType<typeof usualDropoffsFrom>>>([]);
+  const firstPickup = draft.stops.find((s) => s.kind === "pickup");
+  const pickupLine = firstPickup?.address_text.trim() || "";
+  useEffect(() => {
+    if (pickupLine.length < 4) { setUsualDrops([]); return; }
+    const t = setTimeout(() => usualDropoffsFrom(pickupLine).then(setUsualDrops).catch(() => {}), 500);
+    return () => clearTimeout(t);
+  }, [pickupLine]);
   const today = todayISO();
   const customer = contacts.find((c) => c.id === draft.customer_id) || null;
 
@@ -162,10 +171,22 @@ export default function JobForm({ draft, setDraft, contacts, setContacts, ranked
               onCreated={onCreated} placeholder="Name (optional)" suggested={sug("contact")}
               quick={draft.customer_id && !s.contact_id ? [{ id: draft.customer_id, label: "Same as customer" }] : []}
             />
-            <label className="f"><span>Address</span>
-              <input className={"input" + (sug("address") ? " suggested" : "")} value={s.address_text} placeholder="Street, town"
-                onChange={(e) => setStop(i, { address_text: e.target.value, address_id: null, area: detectArea(e.target.value) || s.area }, "address")} />
-            </label>
+            <label className="f"><span>Address</span></label>
+            <AddressInput className={"input" + (sug("address") ? " suggested" : "")} value={s.address_text}
+              onChange={(v) => setStop(i, { address_text: v, address_id: null, area: detectArea(v) || s.area }, "address")}
+              onPick={(v) => setStop(i, { address_text: v, address_id: null, area: detectArea(v) || s.area }, "address")} />
+            {s.kind === "dropoff" && !s.address_text && usualDrops.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div className="small muted">Usually goes to (from this pickup):</div>
+                <div className="chips" style={{ marginTop: 4 }}>
+                  {usualDrops.filter((u) => !draft.stops.some((x) => x.address_text.trim().toLowerCase() === u.address_text.toLowerCase())).map((u) => (
+                    <button type="button" key={u.address_text} className="chip" onClick={() => setStop(i, { address_text: u.address_text, address_id: null, area: u.area || detectArea(u.address_text), contact_id: s.contact_id || u.contact_id, suggested: ["address"] })}>
+                      {u.address_text} <span className="muted small">· {u.count}×</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {known.length > 0 && (
               <div className="chips" style={{ marginTop: 8 }}>
                 {known.map((a) => (
@@ -195,6 +216,13 @@ export default function JobForm({ draft, setDraft, contacts, setContacts, ranked
         <button type="button" className="btn" onClick={() => setDraft({ ...draft, stops: [...draft.stops, emptyStop("pickup")] })}>+ Pick up</button>
         <button type="button" className="btn" onClick={() => setDraft({ ...draft, stops: [...draft.stops, emptyStop("dropoff")] })}>+ Drop off</button>
       </div>
+      {firstPickup && firstPickup.address_text.trim() && !(draft.stops[draft.stops.length - 1]?.kind === "dropoff" && draft.stops[draft.stops.length - 1]?.address_text.trim().toLowerCase() === firstPickup.address_text.trim().toLowerCase()) && (
+        <button type="button" className="btn block" style={{ marginTop: 10 }} onClick={() => setDraft({
+          ...draft,
+          stops: [...draft.stops, { ...emptyStop("dropoff"), contact_id: firstPickup.contact_id, address_id: firstPickup.address_id, address_text: firstPickup.address_text, area: firstPickup.area, instructions: "Return" }],
+          description: draft.description || "Return",
+        })}>↩️ Return to pickup ({firstPickup.address_text.split(",")[0]})</button>
+      )}
 
       <div className="h2">What is it?</div>
       <input className={"input" + (sugField("description") ? " suggested" : "")} value={draft.description} placeholder="e.g. 3 boxes, cake, 2 stops"
