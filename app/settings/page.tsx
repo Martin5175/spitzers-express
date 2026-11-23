@@ -17,6 +17,7 @@ export default function Settings() {
   const [msg, setMsg] = useState(DEFAULT_PHOTO_MESSAGE);
   const [msgSaved, setMsgSaved] = useState(DEFAULT_PHOTO_MESSAGE);
   const [msgErr, setMsgErr] = useState("");
+  const [showMsg, setShowMsg] = useState(false);
 
   const load = useCallback(async () => {
     const [p, f, u] = await Promise.all([
@@ -62,24 +63,7 @@ export default function Settings() {
 
   return (
     <Shell title="Settings" back>
-      <div className="h2" style={{ marginTop: 0 }}>Photo text message</div>
-      <p className="muted small" style={{ marginTop: 0 }}>Sent with every delivery photo. Tap a blue word to add it — it fills in by itself.</p>
-      {msgErr && <div className="note warn small" style={{ marginBottom: 8 }}>{msgErr}</div>}
-      <textarea className="input" rows={4} value={msg} onChange={(e) => setMsg(e.target.value)} />
-      <div className="chips" style={{ marginTop: 8 }}>
-        {PLACEHOLDERS.map(([k, label]) => (
-          <button key={k} className="chip" style={{ minHeight: 38, fontSize: 14, color: "var(--blue)" }} onClick={() => setMsg((m) => (m.endsWith(" ") || !m ? m : m + " ") + k)}>+ {label}</button>
-        ))}
-      </div>
-      <div className="note info small" style={{ marginTop: 10 }}>
-        <b>Example:</b> {fillMessage(msg || DEFAULT_PHOTO_MESSAGE, { customer: "Gemsli", receiver: "Yoely", address: "52 Bakertown Rd", item: "3 boxes", time: "2:15 PM", date: "Nov 23", business: "Spitzer's Express", phone: "845-781-6392" })}
-      </div>
-      <div className="btn-row" style={{ marginTop: 10 }}>
-        <button className="btn ghost" onClick={() => saveMsg(DEFAULT_PHOTO_MESSAGE)}>Reset</button>
-        <button className="btn primary" disabled={msg === msgSaved || !msg.trim()} onClick={() => saveMsg(msg.trim())}>Save message</button>
-      </div>
-
-      <div className="h2">Quick extra charges</div>
+      <div className="h2" style={{ marginTop: 0 }}>Quick extra charges</div>
       <p className="muted small" style={{ marginTop: 0 }}>These show as one-tap buttons on every job.</p>
       {presets.map((p) => (
         <div key={p.id} className="card row" style={{ marginTop: 6, padding: 10 }}>
@@ -108,6 +92,31 @@ export default function Settings() {
           </div>
         </div>
       ))}
+
+      <div className="h2">Photo text message</div>
+      {!showMsg ? (
+        <button className="btn ghost block" onClick={() => setShowMsg(true)}>Change photo text message…</button>
+      ) : (
+        <div>
+      <p className="muted small" style={{ marginTop: 0 }}>Sent with every delivery photo. Tap a blue word to add it — it fills in by itself.</p>
+      {msgErr && <div className="note warn small" style={{ marginBottom: 8 }}>{msgErr}</div>}
+      <textarea className="input" rows={4} value={msg} onChange={(e) => setMsg(e.target.value)} />
+      <div className="chips" style={{ marginTop: 8 }}>
+        {PLACEHOLDERS.map(([k, label]) => (
+          <button key={k} className="chip" style={{ minHeight: 38, fontSize: 14, color: "var(--blue)" }} onClick={() => setMsg((m) => (m.endsWith(" ") || !m ? m : m + " ") + k)}>+ {label}</button>
+        ))}
+      </div>
+      <div className="note info small" style={{ marginTop: 10 }}>
+        <b>Example:</b> {fillMessage(msg || DEFAULT_PHOTO_MESSAGE, { customer: "Gemsli", receiver: "Yoely", address: "52 Bakertown Rd", item: "3 boxes", time: "2:15 PM", date: "Nov 23", business: "Spitzer's Express", phone: "845-781-6392" })}
+      </div>
+      <div className="btn-row" style={{ marginTop: 10 }}>
+        <button className="btn ghost" onClick={() => saveMsg(DEFAULT_PHOTO_MESSAGE)}>Reset</button>
+        <button className="btn primary" disabled={msg === msgSaved || !msg.trim()} onClick={() => saveMsg(msg.trim())}>Save message</button>
+      </div>
+
+          <button className="link" onClick={() => setShowMsg(false)}>Hide</button>
+        </div>
+      )}
 
       <div className="h2">Old spreadsheet</div>
       <Link href="/import" className="btn block">📥 Import from Google Sheet</Link>
