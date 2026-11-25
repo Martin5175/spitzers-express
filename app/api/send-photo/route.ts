@@ -67,9 +67,10 @@ export async function POST(req: Request) {
     customer: customer?.name, receiver: receiver?.name || who?.name, address: dropStop?.address_text?.split(",")[0],
     item: job?.description, time, date,
     business: process.env.BUSINESS_NAME || "Spitzer's Express", phone: process.env.BUSINESS_PHONE || "845-781-6392",
-  }).slice(0, 1500);
+  }).slice(0, 1450);
+  const finalBody = /\bSTOP\b/.test(body) ? body : body + " Reply STOP to opt out.";
 
-  const form = new URLSearchParams({ To: to, From: from, Body: body });
+  const form = new URLSearchParams({ To: to, From: from, Body: finalBody });
   urls.forEach((u) => form.append("MediaUrl", u));
   const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
     method: "POST",

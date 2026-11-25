@@ -1,5 +1,5 @@
 export const DEFAULT_PHOTO_MESSAGE =
-  "Hi {customer}, your delivery to {address} was completed at {time}. Photo attached. Thank you! – {business} {phone}";
+  "Hi {customer}, your delivery to {address} was completed at {time}. Photo attached. Thank you! – {business} {phone}. Reply STOP to opt out.";
 
 export const PLACEHOLDERS: [string, string][] = [
   ["{customer}", "customer name"],
