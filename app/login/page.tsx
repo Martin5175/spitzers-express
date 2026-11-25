@@ -31,6 +31,7 @@ export default function Login() {
         {err && <div className="note bad" style={{ marginTop: 14 }}>{err}</div>}
         <button className="btn primary block xl" style={{ marginTop: 20 }} disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
         <p className="muted small center" style={{ marginTop: 18 }}>You stay signed in on this phone.</p>
+        <p className="small center" style={{ marginTop: 8 }}><a href="/privacy" className="link">Privacy Policy</a> · <a href="/terms" className="link">Terms &amp; Conditions</a></p>
       </form>
     </div>
   );
