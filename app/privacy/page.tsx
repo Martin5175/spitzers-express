@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy Policy – Spitzer's Express
 export default function Privacy() {
   return (
     <LegalPage title="Privacy Policy">
-      <p>{BIZ} (&quot;Spitzer&apos;s Express&quot;, &quot;we&quot;, &quot;us&quot;) is a courier and messenger service serving Brooklyn, Monsey, Monroe and surrounding areas. This policy explains what information we collect when you use our delivery services, how we use it, and the choices you have.</p>
+      <p>Spitzers Express, doing business as {BIZ} (&quot;Spitzers Express&quot;, &quot;we&quot;, &quot;us&quot;), is a courier and messenger service serving Brooklyn, Monsey, Monroe and surrounding areas. This policy explains what information we collect when you use our delivery services, how we use it, and the choices you have.</p>
 
       <h2>Information we collect</h2>
       <ul>
@@ -27,7 +27,7 @@ export default function Privacy() {
 
       <h2>Text messages (SMS/MMS)</h2>
       <p>If you give us your mobile number when you place an order or are named as a recipient, we may text you delivery updates and proof-of-delivery photos. These messages are transactional only; we do not send marketing texts. Message frequency varies with the number of deliveries. Message and data rates may apply. Reply <b>STOP</b> to stop receiving texts, or <b>HELP</b> for help. You can also call {PHONE}.</p>
-      <p><b>We do not sell, rent or share mobile phone numbers or text messaging consent with third parties or affiliates for marketing or promotional purposes.</b> Text messaging originator opt-in data and consent will not be shared with any third parties.</p>
+      <p><b>We do not sell or share your SMS opt-in data or personal information with third parties for marketing purposes.</b> Text messaging originator opt-in data and consent will not be shared with any third parties or affiliates.</p>
 
       <h2>When we share information</h2>
       <p>We do not sell your personal information. We share it only:</p>

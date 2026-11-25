@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Text Message Consent – Spitzer's E
 export default function SmsConsent() {
   return (
     <LegalPage title="Text Message Consent">
-      <p>{BIZ} sends text messages only to confirm completed deliveries, with a photo of the delivered item. We never send marketing texts.</p>
+      <p>Spitzers Express ({BIZ}) sends text messages only to confirm completed deliveries, with a photo of the delivered item. We never send marketing texts.</p>
 
       <h2>How customers agree to receive texts</h2>
       <p>Customers place delivery orders by phone call or message with our driver. A customer agrees to receive delivery texts in one of two ways:</p>
