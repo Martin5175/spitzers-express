@@ -18,6 +18,7 @@ export default function Settings() {
   const [msgSaved, setMsgSaved] = useState(DEFAULT_PHOTO_MESSAGE);
   const [msgErr, setMsgErr] = useState("");
   const [showMsg, setShowMsg] = useState(false);
+  const [texting, setTexting] = useState<"on" | "off">("off");
 
   const load = useCallback(async () => {
     const [p, f, u] = await Promise.all([
@@ -29,10 +30,19 @@ export default function Settings() {
     setFlags((f.data || []) as Flag[]);
     setFlagCount(f.count || 0);
     setEmail(u.data.user?.email || "");
+    const t = await sb().from("app_settings").select("value").eq("key", "texting_enabled").maybeSingle();
+    setTexting(t.data?.value === "on" ? "on" : "off");
     const m = await sb().from("app_settings").select("value").eq("key", "photo_message").maybeSingle();
     if (m.error) setMsgErr("To save a custom message, run the file supabase/update-2-photo-message.sql in Supabase → SQL Editor once.");
     else if (m.data?.value) { setMsg(m.data.value); setMsgSaved(m.data.value); }
   }, []);
+
+  async function setTextingSwitch(v: "on" | "off") {
+    const { error } = await sb().from("app_settings").upsert({ key: "texting_enabled", value: v, updated_at: new Date().toISOString() });
+    if (error) { toast("Couldn't save"); return; }
+    setTexting(v);
+    toast(v === "on" ? "Photo texts are ON" : "Photo texts are OFF");
+  }
 
   async function saveMsg(value: string) {
     const { error } = await sb().from("app_settings").upsert({ key: "photo_message", value, updated_at: new Date().toISOString() });
@@ -63,7 +73,18 @@ export default function Settings() {
 
   return (
     <Shell title="Settings" back>
-      <div className="h2" style={{ marginTop: 0 }}>Quick extra charges</div>
+      <div className="h2" style={{ marginTop: 0 }}>Automatic photo texts</div>
+      <div className="card">
+        <div className="chips">
+          <button className={"chip" + (texting === "on" ? " on" : "")} onClick={() => setTextingSwitch("on")}>On</button>
+          <button className={"chip" + (texting === "off" ? " on" : "")} onClick={() => setTextingSwitch("off")}>Off</button>
+        </div>
+        <p className="muted small" style={{ marginBottom: 0 }}>
+          {texting === "on" ? "Each delivered stop texts its photo (about 2–3¢ each)." : "Photos are saved but not texted. Turn on only after Twilio approves your texting registration — blocked texts are still charged."}
+        </p>
+      </div>
+
+      <div className="h2">Quick extra charges</div>
       <p className="muted small" style={{ marginTop: 0 }}>These show as one-tap buttons on every job.</p>
       {presets.map((p) => (
         <div key={p.id} className="card row" style={{ marginTop: 6, padding: 10 }}>

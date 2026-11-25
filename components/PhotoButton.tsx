@@ -22,9 +22,13 @@ export default function PhotoButton({ jobId, stopId, markDone = true, label = "�
         ids.push(await uploadPhoto(files[i], jobId, stopId));
       }
       if (markDone && stopId) await setStopDone(stopId, jobId, true);
-      setBusy("Texting photo…");
-      const r = await textPhoto(ids);
-      toast(r.ok ? "✓ " + r.message : "⚠️ " + r.message);
+      if (markDone && stopId) {
+        setBusy("Texting photo…");
+        const r = await textPhoto(ids);
+        toast(r.ok ? "✓ " + r.message : "⚠️ " + r.message);
+      } else {
+        toast("✓ Photo saved");
+      }
     } catch (e: any) {
       toast("Photo not saved: " + (e.message || "error") + ". Try again.");
     }

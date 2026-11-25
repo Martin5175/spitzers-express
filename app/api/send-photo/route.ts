@@ -13,6 +13,16 @@ export async function POST(req: Request) {
   const { photoIds } = (await req.json()) as { photoIds: string[] };
   if (!photoIds?.length) return NextResponse.json({ ok: false, message: "No photo" }, { status: 400 });
 
+  // Money guard: Twilio charges even for blocked texts, so nothing is sent unless texting is switched on in Settings.
+  const { data: sw } = await s.from("app_settings").select("value").eq("key", "texting_enabled").maybeSingle();
+  if (sw?.value !== "on") {
+    await s.from("photos").update({ text_status: "not_sent", text_error: "Texting is switched off in Settings" }).in("id", photoIds);
+    return NextResponse.json({ ok: true, message: "Photo saved (texting is off in Settings)" });
+  }
+  // Never text the same photo twice by accident
+  const { data: already } = await s.from("photos").select("id").in("id", photoIds).eq("text_status", "sent");
+  if (already && already.length === photoIds.length) return NextResponse.json({ ok: true, message: "Already texted" });
+
   const { data: photos } = await s.from("photos").select("*").in("id", photoIds);
   if (!photos?.length) return NextResponse.json({ ok: false, message: "Photo not found" }, { status: 404 });
   const jobId = photos[0].job_id;

@@ -106,6 +106,8 @@ export default function Voice() {
     const t = setInterval(() => setSecs((s) => s + 1), 1000);
     return () => clearInterval(t);
   }, [rec]);
+  // Stop automatically at 3 minutes so a forgotten recording doesn't cost money
+  useEffect(() => { if (rec && secs >= 180) { rec.stop(); setRec(null); } }, [secs, rec]);
 
   async function start() {
     setErr("");
@@ -197,7 +199,7 @@ export default function Voice() {
           {rec ? "■" : "🎤"}
         </button>
       )}
-      {rec && <p className="center big-number">{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, "0")}</p>}
+      {rec && <p className="center big-number">{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, "0")} <span className="muted small">/ 3:00</span></p>}
       {busy && <div className="card center" style={{ marginTop: 30, padding: 30 }}><div style={{ fontSize: 40 }}>⏳</div><b>{busy}</b></div>}
       {err && <div className="note bad" style={{ marginTop: 12 }}>{err}</div>}
       {transcript && err && <div className="card small" style={{ marginTop: 8 }}>Heard: {transcript}</div>}
@@ -207,7 +209,7 @@ export default function Voice() {
           <div className="note info small" style={{ marginTop: 16 }}>
             Example: “Gemsli, pick up at 333 Route 211, drop off in Monsey, 35 dollars. Then Em Kay from 203 Rutledge to Monroe.”
           </div>
-          <input ref={file} type="file" accept="audio/*" className="hidden" onChange={(e) => e.target.files?.[0] && send(e.target.files[0])} />
+          <input ref={file} type="file" accept="audio/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; if (f.size > 10 * 1024 * 1024) { setErr("That memo is too long. Keep memos under about 5 minutes."); return; } send(f); }} />
           <div className="btn-row" style={{ marginTop: 16 }}>
             <button className="btn" onClick={() => file.current?.click()}>📁 Upload memo</button>
             <button className="btn" onClick={() => setShowType(!showType)}>⌨️ Type it</button>

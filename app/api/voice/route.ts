@@ -26,6 +26,8 @@ export async function POST(req: Request) {
   const typed = (form.get("text") as string | null) || "";
   let transcript = typed;
 
+  if (audio && audio instanceof Blob && audio.size > 10 * 1024 * 1024) return NextResponse.json({ error: "That memo is too long. Keep memos under about 5 minutes." }, { status: 400 });
+  if (typed.length > 4000) return NextResponse.json({ error: "That's too much text at once." }, { status: 400 });
   if (audio && audio instanceof Blob && audio.size > 0) {
     const fd = new FormData();
     const ext = (audio.type.includes("mp4") || audio.type.includes("m4a")) ? "m4a" : audio.type.includes("mpeg") ? "mp3" : audio.type.includes("wav") ? "wav" : audio.type.includes("ogg") ? "ogg" : "webm";
