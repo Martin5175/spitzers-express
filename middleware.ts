@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-  const open = path.startsWith("/login") || path.startsWith("/api/cron") || path.startsWith("/privacy") || path.startsWith("/terms");
+  const open = path.startsWith("/login") || path.startsWith("/api/cron") || path.startsWith("/privacy") || path.startsWith("/terms") || path.startsWith("/sms-consent");
   if (!data.user && !open) {
     if (path.startsWith("/api/")) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
     const url = req.nextUrl.clone();
